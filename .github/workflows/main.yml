@@ -1,4 +1,4 @@
-# this is workfiow name
+# this is a basic workflow to help you get started with action
 name: hi
 
 on:
