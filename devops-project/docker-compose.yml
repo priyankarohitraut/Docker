@@ -1,0 +1,47 @@
+services: 
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      DB_HOST: db
+      DB_NAME: ${POSTGRES_DB}
+      DB_USER: ${POSTGRES_USER}
+      DB_PASS: ${POSTGRES_PASSWORD}
+      REDIS_HOST: redis
+    networks: 
+     - app-network    
+        
+  db:
+   image: postgres:13
+   restart: always  
+   environment:
+     POSTGRES_DB: ${POSTGRES_DB}
+     POSTGRES_USER: ${POSTGRES_USER}
+     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+   volumes:
+     - pgdata:/var/lib/postgresq/data
+   networks:
+     - app-network
+   healthcheck:
+     test: ["CMD-SHELL","pg_isready -U postgres"]
+     interval: 5s
+     timeout: 5s
+     retries: 5  
+     
+  redis:
+   image: redis:alpine
+   networks:
+     - app-network
+
+volumes:
+   pgdata:
+
+networks:
+   app-network:
+     driver: bridge
